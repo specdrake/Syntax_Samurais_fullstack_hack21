@@ -3,6 +3,10 @@ from rest_framework.serializers import SerializerMethodField
 from .models import User,Profile,Aadhar
 from .exception import *
 import re
+from django.contrib import auth
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.urls import reverse
+from .utils import Util
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -31,3 +35,87 @@ class EmailVerificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['token']
+
+
+class LoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=255,read_only=True)
+    password = serializers.CharField(max_length = 68,min_length = 6,write_only=True)
+    username = serializers.CharField(max_length = 100)
+    tokens = serializers.SerializerMethodField()
+    first_time_login = serializers.SerializerMethodField()
+
+    def get_tokens(self, obj):
+        user = User.objects.get(username=obj['username'])
+        return {
+            'refresh': user.tokens()['refresh'],
+            'access': user.tokens()['access']
+        }
+    def get_first_time_login(self,obj):
+        qs = Profile.objects.get(owner__username = obj['username'])
+        if qs.name is None:
+            return True
+        return False
+
+    class Meta:
+        model = User
+        fields = ['id','username','email','password','tokens','first_time_login']
+
+    def validate(self,attrs):
+        username =  attrs.get('username','')
+        password =  attrs.get('password','')
+        user_obj_email = User.objects.filter(email=username).first()
+        user_obj_username = User.objects.filter(username=username).first()
+        if user_obj_email:
+            user = auth.authenticate(username = user_obj_email.username,password=password)
+            if user_obj_email.auth_provider != 'email':
+                raise AuthenticationException(
+                    'Please continue your login using ' + user_obj_email.auth_provider)
+            if not user:
+                raise AuthenticationException('Invalid credentials. Try again')
+            if not user.is_active:
+                raise AuthenticationException('Account disabled. contact admin')
+            if not user.is_verified:
+                email = user.email
+                token = RefreshToken.for_user(user).access_token
+                current_site = self.context.get('current_site')
+                relative_link = reverse('email-verify')
+                absurl = 'https://' + current_site + relative_link + "?token=" + str(token)
+                email_body = {}
+                email_body['username'] = user.username
+                email_body['message'] = 'Use link below to verify your email'
+                email_body['link'] = absurl
+                data = {'email_body' : email_body,'email_subject' : 'Verify your email','to_email' : user.email}
+                Util.send_email(data)
+                raise AuthenticationException('Email is not verified, A Verification Email has been sent to your email address')
+            return {
+                'email' : user.email,
+                'username' : user.username,
+                'tokens': user.tokens
+            }
+            return super().validate(attrs)
+        if user_obj_username:
+            user = auth.authenticate(username = username,password=password)
+            if not user:
+                raise AuthenticationException('Invalid credentials. Try again')
+            if not user.is_active:
+                raise AuthenticationException('Account disabled. contact admin')
+            if not user.is_verified:
+                email = user.email
+                token = RefreshToken.for_user(user).access_token
+                current_site = self.context.get('current_site')
+                relative_link = reverse('email-verify')
+                absurl = 'https://' + current_site + relative_link + "?token=" + str(token)
+                email_body = {}
+                email_body['username'] = user.username
+                email_body['message'] = 'Use link below to verify your email'
+                email_body['link'] = absurl
+                data = {'email_body' : email_body,'email_subject' : 'Verify your email','to_email' : user.email}
+                Util.send_email(data)
+                raise AuthenticationException('Email is not verified, A Verification Email has been sent to your email address')
+            return {
+                'email' : user.email,
+                'username' : user.username,
+                'tokens': user.tokens
+            }
+            return super().validate(attrs)
+        raise AuthenticationException('Invalid credentials. Try again')

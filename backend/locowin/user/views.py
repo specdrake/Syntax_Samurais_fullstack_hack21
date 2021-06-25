@@ -79,3 +79,23 @@ class VerifyEmail(views.APIView):
             return redirect(redirect_url + '?email=ActivationLinkExpired')
         except jwt.exceptions.DecodeError as identifier:
             return redirect(redirect_url + '?email=InvalidToken')
+
+class LoginApiView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def post(self,request):
+        """
+        Endpoint for logging in a user
+        """
+        serializer = self.serializer_class(data=request.data,context = {'current_site' : get_current_site(request).domain})
+        serializer.is_valid(raise_exception = True)
+        return Response(serializer.data,status = status.HTTP_200_OK)
+
+class CheckAuthView(views.APIView):
+    permission_classes = [Authenticated]
+
+    def get(self,request,*args, **kwargs):
+        """
+        Endpoint for checking if user is authenticated or not by checking if the JWT token is valid or not.
+        """
+        return Response({'status' : 'OK',"result" : "Token is Valid"},status=status.HTTP_200_OK)
