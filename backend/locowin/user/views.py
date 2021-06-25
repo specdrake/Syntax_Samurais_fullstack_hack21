@@ -16,6 +16,7 @@ from django.urls import reverse
 from .utils import Util
 from django.shortcuts import redirect
 import os
+from rest_framework.generics import UpdateAPIView,ListAPIView,ListCreateAPIView
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
@@ -99,3 +100,57 @@ class CheckAuthView(views.APIView):
         Endpoint for checking if user is authenticated or not by checking if the JWT token is valid or not.
         """
         return Response({'status' : 'OK',"result" : "Token is Valid"},status=status.HTTP_200_OK)
+
+
+class SendVerificationMail(generics.GenericAPIView):
+    serializer_class = SendEmailVerificationSerializer
+
+    def post(self,request,*args, **kwargs):
+        """
+        Endpoint for sending a verification mail
+        """
+        email = request.data.get('email',None)
+        if email is None:
+            return Response({'status' : 'FAILED','error' : 'Email not provided'},status=status.HTTP_400_BAD_REQUEST)
+        if not User.objects.filter(email = email).exists():
+            return Response({'status' : 'FAILED','error' :'The given email does not exist'},status = status.HTTP_400_BAD_REQUEST)
+        user = User.objects.get(email=email)
+        token = RefreshToken.for_user(user).access_token
+        current_site = get_current_site(request).domain
+        relative_link = reverse('email-verify')
+        redirect_url = request.GET.get('redirect_url',None)
+        absurl = 'https://' + current_site + relative_link + "?token=" + str(token)
+        if redirect_url != None:
+            absurl += "&redirect_url=" + redirect_url
+        email_body = {}
+        email_body['username'] = user.username
+        email_body['message'] = 'Verify your email'
+        email_body['link'] = absurl
+        data = {'email_body' : email_body,'email_subject' : 'LoCoWin - Email Verification','to_email' : user.email}
+        Util.send_email(data)
+        return Response({'status' : 'OK','result' :'A Verification Email has been sent'},status = status.HTTP_200_OK)
+
+
+class ProfileGetView(ListAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [Authenticated,IsOwner]
+    queryset = Profile.objects.all()
+
+    def get_queryset(self):
+        return self.queryset.filter(owner=self.request.user)
+
+
+
+class ProfileUpdateView(UpdateAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [Authenticated,IsOwner]
+    queryset = Profile.objects.all()
+    lookup_field = "owner_id__username"
+
+    def get_serializer_context(self,**kwargs):
+        data = super().get_serializer_context(**kwargs)
+        data['user'] = self.request.user.username
+        return data
+
+    def get_queryset(self):
+        return self.queryset.filter(owner=self.request.user)
