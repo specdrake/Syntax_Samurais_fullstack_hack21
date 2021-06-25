@@ -157,3 +157,66 @@ class BookSlot(generics.GenericAPIView):
             return Response({"status" : "OK","result" : "The given slot has been booked and a confirmation mail has been sent"},status=status.HTTP_200_OK)
         else:
             return Response({"status" : "Failed","errors" : "You have already taken both the doses"},status=status.HTTP_400_BAD_REQUEST)
+        
+class ListUser(generics.GenericAPIView):
+    permission_classes = [AuthenticatedOfficer]
+    serializer_class = ListAllSerializer
+    
+    def post(self,request):
+        data = request.data
+        waypoint_id = data.get('waypoint_id',None)
+        date = data.get('date',None)
+        if not waypoint_id:
+            return Response({"status" : "Failed","errors" : "Waypoint id not provided"},status=status.HTTP_400_BAD_REQUEST)
+        waypoint = Waypoint.objects.get(id=waypoint_id)
+        res = []
+        for ele in Vaccination_Schedule.objects.filter(waypoint=waypoint):
+            if str(ele.date.date()) != date:
+                continue
+            curr_user = ele.user
+            prof = Profile.objects.get(owner=curr_user)
+            here = {
+                'id' : curr_user.id,
+                'name' : prof.name,
+                'age' : prof.age,
+                'aadhar' :  prof.aadhar,
+                'phone' : prof.phone,
+                'dose' : prof.received+1,
+                'special' : prof.special
+            }
+            res.append(here)
+        res.sort(key = lambda x : (x['special'],x['age']),reverse=True)
+        return Response({"status" : "OK","result" : res},status=status.HTTP_200_OK)
+    
+class UserVaccinated(generics.GenericAPIView):
+    permission_classes = [AuthenticatedOfficer]
+    serializer_class = UserconfirmSerializer
+    
+    def post(self,request):
+        data = request.data
+        user_id = data.get('user_id',None)
+        waypoint_id = data.get('waypoint_id',None)
+        if not user_id:
+            return Response({"status" : "Failed","errors" : "User id not provided"},status=status.HTTP_400_BAD_REQUEST)
+        if not waypoint_id:
+            return Response({"status" : "Failed","errors" : "Waypoint id not provided"},status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.get(id = user_id)
+        waypoint = Waypoint.objects.get(id=waypoint_id)
+        if Vaccination_Schedule.objects.filter(user=user,waypoint=waypoint).exists():
+            here = Vaccination_Schedule.objects.get(user=user,waypoint=waypoint)    
+            here.delete()
+            prof = Profile.objects.get(owner=user)
+            prof.received += 1
+            prof.save() 
+            email_body = {
+                'username' : user.username,
+                'message' : 'You have been successfully administered a vaccine',
+                'waypoint' : waypoint.name,
+                'date' : timezone.now(),
+                'brand' : here.van.brand,
+                'dose' : here.type
+            }
+            data = {'email_body' : email_body,'email_subject' : 'LoCoWin - Vaccine Confirmation','to_email' : user.email}
+            Util.send_confirmation(data)
+            return Response({"status" : "OK","result" :"Vaccine confirmation mail sent to user"},status=status.HTTP_200_OK)
+        return Response({"status" : "Failed","result" :"No such Vaccine schedule exists"},status=status.HTTP_400_BAD_REQUEST)

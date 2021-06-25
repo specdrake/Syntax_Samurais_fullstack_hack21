@@ -26,3 +26,15 @@ class BookSlotSerializer(serializers.Serializer):
     class Meta:
         model = Waypoint
         fields = ('id','name','capacity','duration','latitude','longitude','eta','van_info')
+
+class ListAllSerializer(serializers.Serializer):
+    waypoint_id = serializers.IntegerField(required=True)
+    date = serializers.DateField(required=True)
+    class Meta:
+        fields = ('waypoint_id','date',)
+
+class UserconfirmSerializer(serializers.Serializer):
+    waypoint_id = serializers.IntegerField(required=True)
+    user_id = serializers.IntegerField(required=True)
+    class Meta:
+        fields = ('user_id','waypoint_id',)
