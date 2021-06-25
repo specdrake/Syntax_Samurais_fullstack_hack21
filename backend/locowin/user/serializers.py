@@ -7,7 +7,9 @@ from django.contrib import auth
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.urls import reverse
 from .utils import Util
-
+from django.utils.encoding import smart_bytes,smart_str,force_str,DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode,urlsafe_base64_decode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=68,min_length=6,write_only=True)
@@ -161,3 +163,56 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['name','age','aadhar','phone','status','latitude','longitude','next_dose_status']
+        
+class RequestPasswordResetEmailSeriliazer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    class Meta:
+        fields = ['email']
+
+
+    
+class ResetPasswordEmailRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=2)
+
+    redirect_url = serializers.CharField(max_length=500, required=False)
+
+    class Meta:
+        fields = ['email']
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(
+        min_length=6, max_length=68, write_only=True)
+    token = serializers.CharField(
+        min_length=1, write_only=True)
+    uidb64 = serializers.CharField(
+        min_length=1, write_only=True)
+
+    class Meta:
+        fields = ['password', 'token', 'uidb64']
+
+    def validate(self, attrs):
+        try:
+            password = attrs.get('password')
+            token = attrs.get('token')
+            uidb64 = attrs.get('uidb64')
+
+            id = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(id=id)
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                raise AuthenticationException('The reset link is invalid')
+
+            user.set_password(password)
+            user.save()
+
+            return (user)
+        except Exception as e:
+            raise AuthenticationException('The reset link is invalid')
+        return super().validate(attrs)
+
+class PasswordChangeSerializer(serializers.Serializer):
+    old_pass = serializers.CharField(max_length = 68,min_length = 6,required=True)
+    new_pass = serializers.CharField(max_length = 68,min_length = 6,required=True)
+
+    class Meta:
+        fields = ['old_pass','new_pass']

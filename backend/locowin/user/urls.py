@@ -14,4 +14,12 @@ urlpatterns = [
     path('send-email/',SendVerificationMail.as_view(),name='send-email'),
     path('profile/',ProfileGetView.as_view(),name = "profile"),
     path('profile/<str:owner_id__username>',ProfileUpdateView.as_view(),name = "profile"),
+    path('request-reset-email/', RequestPasswordResetEmail.as_view(),
+         name="request-reset-email"),
+    path('password-reset/<uidb64>/<token>/',
+         PasswordTokenCheckAPI.as_view(), name='password-reset-confirm'),
+    path('password-reset-complete', SetNewPasswordAPIView.as_view(),
+         name='password-reset-complete'), 
+    path('password-change/',ChangePassword.as_view(),name='password-change'),
+    path('password-reset-complete', SetNewPasswordAPIView.as_view(),name='password-reset-complete'),
 ]

@@ -17,6 +17,8 @@ from .utils import Util
 from django.shortcuts import redirect
 import os
 from rest_framework.generics import UpdateAPIView,ListAPIView,ListCreateAPIView
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.auth import authenticate
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
@@ -154,3 +156,110 @@ class ProfileUpdateView(UpdateAPIView):
 
     def get_queryset(self):
         return self.queryset.filter(owner=self.request.user)
+    
+
+class ChangePassword(generics.GenericAPIView):
+    permission_classes = [Authenticated]
+    serializer_class = PasswordChangeSerializer
+
+    def post(self,request,*args,**kwargs):
+        """
+        Endpoint for changing the password
+        """
+        data = request.data
+        old_pass = data.get('old_pass',None)
+        new_pass = data.get('new_pass',None)
+        if old_pass is None or new_pass is None:
+            return Response({'status' : 'FAILED','error' :'Either the old or new password was not provided'},status=status.HTTP_400_BAD_REQUEST)
+        user = authenticate(username=self.request.user.username,password=old_pass)
+        if new_pass == old_pass:
+            return Response({'status' : 'FAILED','error' :"The new password is same as the old password"},status=status.HTTP_400_BAD_REQUEST)
+        if len(new_pass) < 6:
+            return Response({'status' : 'FAILED','error' :"The password is too short, should be of minimum length 6"},status=status.HTTP_400_BAD_REQUEST)
+        if user is None:
+            return Response({'status' : 'FAILED','error' :"Wrong Password"},status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_pass)
+        user.save()
+        return Response({'status' : 'OK','result' :"Password Change Complete"},status=status.HTTP_200_OK)
+
+class RequestPasswordResetEmail(generics.GenericAPIView):
+    serializer_class = ResetPasswordEmailRequestSerializer
+
+    def post(self, request):
+        """
+        Endpoint for sending the password reset email
+        """
+        serializer = self.serializer_class(data=request.data)
+
+        email = request.data.get('email', None)
+        if email is None:
+            return Response({'status': 'Failed','error' :'Email has not been provided'}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email=email)
+            if user.auth_provider != 'email':
+                return Response({'status': 'Failed','error' :'You cannot reset password if you registered with google'}, status=status.HTTP_400_BAD_REQUEST)
+            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+            current_site = get_current_site(
+                request=request).domain
+            relativeLink = reverse(
+                'password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})
+
+            redirect_url = request.data.get('redirect_url', '')
+            absurl = 'https://'+current_site + relativeLink
+            email_body = {}
+            email_body['username'] = user.username
+            email_body['message'] = 'Reset your Password'
+            email_body['link'] = absurl + "?redirect_url="+redirect_url
+            data = {'email_body': email_body, 'to_email': user.email,
+                    'email_subject': 'LoCoWin - Password Reset'}
+            Util.send_email(data)
+            return Response({'status': 'OK','result' :'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+        return Response({'status': 'Failed','error' :'The given email does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class PasswordTokenCheckAPI(generics.GenericAPIView):
+    serializer_class = SetNewPasswordSerializer
+
+    def get(self, request, uidb64, token):
+        redirect_url = request.GET.get('redirect_url')
+        try:
+            id = smart_str(urlsafe_base64_decode(uidb64))
+            if not User.objects.filter(id=id).exists():
+                return Response({"status" : 'FAILED','error' :"UIDB Token is invalid"},status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(id=id)
+
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                if redirect_url and len(redirect_url) > 3:
+                    return redirect(redirect_url+'?token_valid=False')
+                else:
+                    return redirect(os.getenv('FRONTEND_URL', '')+'?token_valid=False')
+                return Response({'status' : 'FAILED','error' : 'Token is invalid. Please request a new one'})
+            if redirect_url and len(redirect_url) > 3:
+                return redirect(redirect_url+'?token_valid=True&message=Credentials Valid&uidb64='+uidb64+'&token='+token)
+            else:
+                return redirect(os.getenv('FRONTEND_URL', '')+'?token_valid=False')
+
+        except DjangoUnicodeDecodeError as identifier:
+            try:
+                if not PasswordResetTokenGenerator().check_token(user):
+                    return redirect(redirect_url+'?token_valid=False')
+                    
+            except UnboundLocalError as e:
+                return Response({'status' : 'FAILED','error': 'Token is not valid, please request a new one'}, status=status.HTTP_400_BAD_REQUEST)
+            if not PasswordResetTokenGenerator().check_token(user, token):
+                return Response({'status' : 'FAILED','error' : 'Token is invalid. Please request a new one'},status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class SetNewPasswordAPIView(generics.GenericAPIView):
+    serializer_class = SetNewPasswordSerializer
+
+    def patch(self, request):
+        """
+        Endpoint for changing the password in the profile
+        """
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({'status': 'OK', 'result': 'Password reset success'}, status=status.HTTP_200_OK)
