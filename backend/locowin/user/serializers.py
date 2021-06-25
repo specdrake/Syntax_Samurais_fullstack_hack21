@@ -136,14 +136,17 @@ class ProfileSerializer(serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
     latitude = serializers.IntegerField(required=True)
     longitude = serializers.IntegerField(required=True)
-    next_dose_status = serializers.CharField(read_only=True)
+    received = serializers.CharField(required=True)
+    special = serializers.BooleanField(required=True)
     
     def validate_aadhar(self,attrs):
         curr_user = self.context.get('user')
         if len(attrs) != 12:
             raise ValidationException("The length of Aadhar Card should be exactly 12 characters")
         if Aadhar.objects.filter(aadhar=attrs).exists():
-            raise ValidationException("Your Aadhar Card needs to be unique")
+            check = Aadhar.objects.get(aadhar=attrs)
+            if check.user.username != curr_user:
+                raise ValidationException("Your Aadhar Card needs to be unique")
         user = User.objects.get(username=curr_user)
         here = Aadhar.objects.filter(user=user)
         if here.exists():
@@ -159,10 +162,13 @@ class ProfileSerializer(serializers.ModelSerializer):
             raise ValidationException("The Phone Number should be exactly 10 digits")
         return attrs
             
-    
+    def validate_received(self,attrs):
+        if int(attrs) < 0 or int(attrs) > 2:
+            raise ValidationException("Received Doses can only be between 0 and 2")
+        return attrs
     class Meta:
         model = Profile
-        fields = ['name','age','aadhar','phone','status','latitude','longitude','next_dose_status']
+        fields = ['name','age','aadhar','phone','status','latitude','longitude','received','special']
         
 class RequestPasswordResetEmailSeriliazer(serializers.Serializer):
     email = serializers.EmailField(min_length=2)
