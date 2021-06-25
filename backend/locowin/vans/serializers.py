@@ -18,7 +18,11 @@ class AllSlotsSerializer(serializers.ModelSerializer):
         }
         return res
     
-    
+class BookSlotSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=True)
+    date = serializers.DateField(required=True)
+    class Meta:
+        fields = ('id','date') 
     class Meta:
         model = Waypoint
         fields = ('id','name','capacity','duration','latitude','longitude','eta','van_info')
