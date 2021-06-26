@@ -71,6 +71,7 @@ class Profile(models.Model):
     latitude = models.DecimalField(max_digits = 15,decimal_places=9,null=True,blank=True)
     longitude = models.DecimalField(max_digits = 15,decimal_places=9,null=True,blank=True)
     received = models.IntegerField(default=0)
+    special = models.BooleanField(default=False)
     
     def __str__(self):
         return str(self.owner) + "'s Profile"
