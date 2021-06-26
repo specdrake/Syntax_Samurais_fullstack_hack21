@@ -265,7 +265,7 @@ class LocationMark(generics.GenericAPIView):
         cnt = Waypoint_Queue.objects.filter(van=curr_van).order_by('eta').count()
         if cnt == 0:
             return Response({"status" : "OK","result" : "Location Updated"},status=status.HTTP_200_OK)
-        temp = queue[0].waypoint
+        #temp = queue[0].waypoint
         curr_van.latitude = temp.latitude
         curr_van.longitude = temp.longitude
         curr_van.save() 
