@@ -220,3 +220,30 @@ class UserVaccinated(generics.GenericAPIView):
             Util.send_confirmation(data)
             return Response({"status" : "OK","result" :"Vaccine confirmation mail sent to user"},status=status.HTTP_200_OK)
         return Response({"status" : "Failed","result" :"No such Vaccine schedule exists"},status=status.HTTP_400_BAD_REQUEST)
+    
+
+class Sendgrievancemail(generics.GenericAPIView):
+    permission_classes = [AuthenticatedOfficer]
+    serializer_class = ListAllSerializer 
+    
+    def post(self,request):
+        data = request.data
+        waypoint_id = data.get('waypoint_id',None)
+        date = data.get('date',None)
+        if not waypoint_id:
+            return Response({"status" : "Failed","errors" : "Waypoint id not provided"},status=status.HTTP_400_BAD_REQUEST)
+        waypoint = Waypoint.objects.get(id=waypoint_id)
+        for ele in Vaccination_Schedule.objects.filter(waypoint=waypoint):
+            if str(ele.date.date()) == date:
+                email_body = {
+                    'username' : ele.user.username,
+                    'message' : 'We regret to inform you that due to unavoidable circumstances your vaccination slot has been cancelled. We encourage you to book a new one',
+                    'waypoint' : waypoint.name,
+                    'date' : ele.date,
+                    'brand' : ele.van.brand,
+                    'dose' : ele.type
+                }
+                ele.delete()
+                data = {'email_body' : email_body,'email_subject' : 'LoCoWin - Slot Cancellation','to_email' : ele.user.email}
+                Util.send_cancellation(data)
+        return Response({"status" : "OK","result" : "All users assigned to this waypoint have been sent a cancellation email"})

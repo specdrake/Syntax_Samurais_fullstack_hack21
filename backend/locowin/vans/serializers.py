@@ -17,6 +17,9 @@ class AllSlotsSerializer(serializers.ModelSerializer):
             "brand" : van_here.brand,
         }
         return res
+    class Meta:
+        model = Waypoint
+        fields = ('id','name','capacity','latitude','longitude','eta','van_info')
     
 class BookSlotSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
