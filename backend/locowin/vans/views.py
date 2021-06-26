@@ -247,3 +247,36 @@ class Sendgrievancemail(generics.GenericAPIView):
                 data = {'email_body' : email_body,'email_subject' : 'LoCoWin - Slot Cancellation','to_email' : ele.user.email}
                 Util.send_cancellation(data)
         return Response({"status" : "OK","result" : "All users assigned to this waypoint have been sent a cancellation email"})
+    
+class LocationMark(generics.GenericAPIView):
+    permission_classes =[AuthenticatedOfficer]
+    serializer_class = LocationMark
+    
+    def post(self,request):
+        data = request.data
+        waypoint_id = data.get('waypoint_id',None) 
+        if not waypoint_id:
+            return Response({"status" : "Failed","errors" : "Waypoint id not provided"},status=status.HTTP_400_BAD_REQUEST)
+        waypoint = Waypoint.objects.get(id=waypoint_id)
+        queue = Waypoint_Queue.objects.filter(waypoint=waypoint).order_by('eta')
+        temp = queue[0]
+        queue[0].delete()
+        if Waypoint_Queue.objects.filter(waypoint=waypoint).order_by('eta').count() == 0:
+            return Response({"status" : "OK","result" : "Location Updated"},status=status.HTTP_200_OK)
+        van = queue[0].van
+        van_here = Van.objects.get(id=van.id)
+        van_here.latitude = temp.waypoint.latitude
+        van_here.longitude = temp.waypoint.longitude
+        van_here.save() 
+        for ele in Vaccination_Schedule.objects.filter(waypoint=queue[0].waypoint):
+            email_body = {
+                'username' : ele.user.username,
+                'message' : 'Your slot is next, Get ready at the given slot and time',
+                'waypoint' : waypoint.name,
+                'date' : ele.date,
+                'brand' : ele.van.brand,
+                'dose' : ele.type
+            } 
+            data = {'email_body' : email_body,'email_subject' : 'LoCoWin - Slot Cancellation','to_email' : ele.user.email}
+            Util.send_confirmation(data)
+        return Response({"status" : "OK","result" : "Van location updated and users in the next slot have been informed"},status=status.HTTP_200_OK)

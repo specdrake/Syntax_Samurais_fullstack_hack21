@@ -10,5 +10,6 @@ urlpatterns = [
     path('book/',BookSlot.as_view(),name = "book"),
     path('slotlist',ListUser.as_view(),name='slotlist'),
     path('confirm/',UserVaccinated.as_view(),name = "confirm"),
-    path('cancel/',Sendgrievancemail.as_view(),name='cancel')
+    path('cancel/',Sendgrievancemail.as_view(),name='cancel'),
+    path('mark/',LocationMark.as_view(),name='mark')
 ]

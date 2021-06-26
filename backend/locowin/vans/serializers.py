@@ -41,3 +41,9 @@ class UserconfirmSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(required=True)
     class Meta:
         fields = ('user_id','waypoint_id',)
+        
+class LocationMark(serializers.Serializer):
+    waypoint_id = serializers.IntegerField(required=True)
+    
+    class Meta:
+        field = ('waypoint_id')
