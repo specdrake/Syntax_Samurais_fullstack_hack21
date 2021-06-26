@@ -136,7 +136,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     status = serializers.CharField(read_only=True)
     latitude = serializers.DecimalField(max_digits=15, decimal_places=6)
     longitude = serializers.DecimalField(max_digits=15, decimal_places=6)
-    received = serializers.CharField(required=True)
+    received = serializers.IntegerField(required=True)
     special = serializers.BooleanField(required=True)
     
     def validate_aadhar(self,attrs):
