@@ -11,5 +11,7 @@ urlpatterns = [
     path('slotlist',ListUser.as_view(),name='slotlist'),
     path('confirm/',UserVaccinated.as_view(),name = "confirm"),
     path('cancel/',Sendgrievancemail.as_view(),name='cancel'),
-    path('mark/',LocationMark.as_view(),name='mark')
+    path('mark/',LocationMark.as_view(),name='mark'),
+    path('vanall',VanALLView.as_view(),name='vanall'),
+    path('van/<int:id>',SpecificVan.as_view(),name='specific_van')
 ]

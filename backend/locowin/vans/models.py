@@ -20,13 +20,11 @@ class Van(models.Model):
     
     def __str__(self):
         return "Van " + str(self.id)
-class Vaccination_Officer(models.Model):
-    van = models.ForeignKey(to=Van,on_delete=models.CASCADE)
-    user = models.ForeignKey(to=User,on_delete=models.CASCADE)
     
 class Waypoint_Queue(models.Model):
     waypoint = models.ForeignKey(to=Waypoint,on_delete=models.CASCADE)
     van = models.ForeignKey(to=Van,on_delete=models.CASCADE)
+    eta = models.DateTimeField(null=True,blank=True)
     
     def __str__(self):
         return self.waypoint.name + "--> Van " + str(self.van.id)

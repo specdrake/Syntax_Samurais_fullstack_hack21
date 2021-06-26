@@ -43,13 +43,13 @@ class UserconfirmSerializer(serializers.Serializer):
         fields = ('user_id','waypoint_id',)
         
 class LocationMark(serializers.Serializer):
-    waypoint_id = serializers.IntegerField(required=True)
+    van_id = serializers.IntegerField(required=True)
     
     class Meta:
-        field = ('waypoint_id')
+        fields = ('van_id')
         
 class VanSerialzier(serializers.ModelSerializer):
     
     class Meta:
-        model = Van,
+        model = Van
         fields = ('id','d1','d2','brand','latitude','longitude')

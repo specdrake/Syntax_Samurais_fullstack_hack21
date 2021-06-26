@@ -40,7 +40,7 @@ class Dashboard(generics.GenericAPIView):
     
 class AllSlots(generics.ListAPIView):
     serializer_class = AllSlotsSerializer
-    queryset = Waypoint.objects.all()
+    queryset = Waypoint.objects.all().order_by('eta')
     
     
 class BestSlots(generics.GenericAPIView):
@@ -254,30 +254,30 @@ class LocationMark(generics.GenericAPIView):
     
     def post(self,request):
         data = request.data
-        waypoint_id = data.get('waypoint_id',None) 
-        if not waypoint_id:
-            return Response({"status" : "Failed","errors" : "Waypoint id not provided"},status=status.HTTP_400_BAD_REQUEST)
-        waypoint = Waypoint.objects.get(id=waypoint_id)
-        queue = Waypoint_Queue.objects.filter(waypoint=waypoint).order_by('eta')
+        van_id = data.get('van_id',None) 
+        if not van_id:
+            return Response({"status" : "Failed","errors" : "Van id not provided"},status=status.HTTP_400_BAD_REQUEST)
+        curr_van = Van.objects.get(id=van_id)
+        queue = Waypoint_Queue.objects.filter(van=curr_van).order_by('eta')
         temp = queue[0]
         queue[0].delete()
-        if Waypoint_Queue.objects.filter(waypoint=waypoint).order_by('eta').count() == 0:
+        cnt = Waypoint_Queue.objects.filter(van=curr_van).order_by('eta').count()
+        if cnt == 0:
             return Response({"status" : "OK","result" : "Location Updated"},status=status.HTTP_200_OK)
-        van = queue[0].van
-        van_here = Van.objects.get(id=van.id)
-        van_here.latitude = temp.waypoint.latitude
-        van_here.longitude = temp.waypoint.longitude
-        van_here.save() 
+        temp = queue[0].waypoint
+        curr_van.latitude = temp.latitude
+        curr_van.longitude = temp.longitude
+        curr_van.save() 
         for ele in Vaccination_Schedule.objects.filter(waypoint=queue[0].waypoint):
             email_body = {
                 'username' : ele.user.username,
                 'message' : 'Your slot is next, Get ready at the given slot and time',
-                'waypoint' : waypoint.name,
+                'waypoint' : ele.waypoint.name,
                 'date' : ele.date,
                 'brand' : ele.van.brand,
                 'dose' : ele.type
             } 
-            data = {'email_body' : email_body,'email_subject' : 'LoCoWin - Slot Cancellation','to_email' : ele.user.email}
+            data = {'email_body' : email_body,'email_subject' : 'LoCoWin - Slot Reminder','to_email' : ele.user.email}
             Util.send_confirmation(data)
         return Response({"status" : "OK","result" : "Van location updated and users in the next slot have been informed"},status=status.HTTP_200_OK)
 

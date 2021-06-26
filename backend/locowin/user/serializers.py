@@ -134,8 +134,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     aadhar = serializers.CharField(required=True)
     phone = serializers.CharField(required=True)
     status = serializers.CharField(read_only=True)
-    latitude = serializers.IntegerField(required=True)
-    longitude = serializers.IntegerField(required=True)
+    latitude = serializers.DecimalField(max_digits=15, decimal_places=6)
+    longitude = serializers.DecimalField(max_digits=15, decimal_places=6)
     received = serializers.CharField(required=True)
     special = serializers.BooleanField(required=True)
     
