@@ -266,8 +266,8 @@ class LocationMark(generics.GenericAPIView):
         if cnt == 0:
             return Response({"status" : "OK","result" : "Location Updated"},status=status.HTTP_200_OK)
         #temp = queue[0].waypoint
-        curr_van.latitude = temp.latitude
-        curr_van.longitude = temp.longitude
+        curr_van.latitude = temp.waypoint.latitude
+        curr_van.longitude = temp.waypoint.longitude
         curr_van.save() 
         for ele in Vaccination_Schedule.objects.filter(waypoint=queue[0].waypoint):
             email_body = {
