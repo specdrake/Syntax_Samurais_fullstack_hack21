@@ -68,7 +68,7 @@ class BestSlots(generics.GenericAPIView):
         all.sort(key = lambda x : abs(x.latitude-lat) + abs(x.longitude-long))
         print(all)
         res = []
-        for ele in all[:5]:
+        for ele in all[:4]:
             res.append(AllSlotsSerializer(ele).data)
         return Response({"status" : "OK","result" : res},status=status.HTTP_200_OK)
     
