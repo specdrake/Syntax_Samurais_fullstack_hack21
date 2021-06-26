@@ -1,0 +1,339 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
+
+:root {
+    --font: #86bbd8;
+    --high: #ff5757;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    background: url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ffreedesignfile.com%2Fupload%2F2017%2F02%2FWhite-abstract-background-with-wave-vector-illustration-01.jpg&f=1&nofb=1');
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Open Sans', sans-serif;
+}
+
+/* ============ NAV ============= */
+
+.nav {
+    display: flex;
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    z-index: 100;
+    color: var(--font);
+    height: 100px;
+    line-height: 100px;
+    font-size: 2em;
+}
+
+.link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.title {
+    position: absolute;
+    left: 50px;
+    font-size: 2em;
+}
+
+.buttons {
+    position: absolute;
+    right: 50px;
+    display: flex;
+}
+
+.buttons div {
+    padding: 0 20px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* =========== HOME =========== */
+
+.home {
+    color: var(--font);
+}
+
+/* --------- front ---------- */
+
+.front {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    text-align: center;
+}
+
+.stat {
+    font-size: 8em;
+    margin-top: 30vh;
+}
+
+.stat-tag {
+    font-size: 2em;
+    margin-top: -50px;
+}
+
+.arrow {
+    font-size: 3em;
+    margin-top: 15vh;
+    cursor: pointer;
+}
+
+/* ---------- map ------------ */
+
+.map {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 100vh;
+}
+
+.map-container {
+    height: 100%;
+}
+
+.map-title {
+    font-size: 3em;
+    margin: 0 50px;
+    line-height: 20vh;
+}
+
+.map-section {
+    position: absolute;
+    top: 20vh;
+    height: 80vh;
+    width: 100vw;
+    background: #0001;
+}
+
+/* ----------- waypoints -------------- */
+
+.waypoints {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 200vh;
+}
+
+.wayp-title {
+    font-size: 3em;
+    margin: 0 50px;
+    line-height: 20vh;
+}
+
+.wayp-tag {
+    font-size: 1.5em;
+    margin: 0 50px;
+}
+
+.wayp-list {
+    position: absolute;
+    width: 40vw;
+    height: 100vh;
+    right: 0;
+    top: 0;
+    overflow: scroll;
+}
+
+.wayp {
+    height: 15vh;
+    width: 30vw;
+    border: 5px solid var(--font);
+    margin: 20px calc(5vw - 20px);
+    padding: 15px;
+    border-radius: 15px;
+}
+
+.wp-title {
+    font-size: 1.5em;
+}
+
+.wp-buttons {
+    display: flex;
+    margin-left: calc(30vw - 240px);
+}
+
+.wp-buttons div {
+    width: 100px;
+    height: 40px;
+    background: var(--font);
+    color: #fff;
+    text-align: center;
+    line-height: 40px;
+    border-radius: 10px;
+    margin: 10px;
+    cursor: pointer;
+}
+
+.vax-img img {
+    width: 20vw;
+    position: absolute;
+    top: 40vh;
+    left: 20vw;
+}
+
+/* ========== DASHBOARD ========== */
+
+.dashboard {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+}
+
+.dash-area {
+    margin: 30vh 20vw;
+}
+
+.dash-tip {
+    color: var(--font);
+    font-size: 2em;
+    margin: 20px 0;
+}
+
+.dash-tip span {
+    color: var(--high);
+}
+
+.dash-add {
+    margin-left: 100px;
+    font-size: 0.8em;
+    line-height: 15px;
+    font-style: italic;
+}
+
+.ret-link {
+    position: absolute;
+    top: 80vh;
+    left: 60vw;
+}
+
+.ret-button {
+    width: 300px;
+    height: 50px;
+    line-height: 50px;
+    background: var(--font);
+    color: #fff;
+    text-align: center;
+    font-size: 1.5em;
+}
+
+/* =========== LOGIN =========== */
+
+.login {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+}
+
+.log-title {
+    font-size: 3em;
+    text-align: center;
+    color: var(--font);
+    margin-bottom: 20px;
+}
+
+.login-f, .register-f {
+    width: 30vw;
+    position: absolute;
+    top: 30vh;
+}
+
+.login-f {
+    left: 7.5vw;
+}
+
+.register-f {
+    right: 7.5vw;
+}
+
+.sep {
+    width: 3px;
+    height: 50vh;
+    position: absolute;
+    background: var(--font);
+    left: 50vw;
+    top: 30vh;
+}
+
+.login input, .login button {
+    outline: none;
+    border: none;
+    height: 50px;
+    line-height: 50px;
+    font-family: 'Open Sans', sans-serif;
+    margin: 20px 0;
+    
+}
+
+.login input {
+    width: 30vw;
+    border-bottom: 3px solid var(--font);
+    font-size: 2em;
+    background: transparent;
+}
+
+.login button {
+    position: absolute;
+    width: 200px;
+    background: var(--font);
+    color: #fff;
+    text-align: center;
+    font-size: 1.5em;
+    right: 0;
+    cursor: pointer;
+}
+
+/* ======== ACCOUNT ======= */
+
+.account {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+}
+
+.acc-title {
+    font-size: 3em;
+    color: var(--font);
+    margin-bottom: 20px;
+}
+
+.acc-area {
+    position: absolute;
+    width: 60vw;
+    top: 30vh;
+    left: 20vw;
+}
+
+.account input, .account button {
+    outline: none;
+    border: none;
+    height: 50px;
+    line-height: 50px;
+    font-family: 'Open Sans', sans-serif;
+    margin: 20px 0;
+    display: block;
+}
+
+.account input {
+    width: 60vw;
+    border-bottom: 3px solid var(--font);
+    font-size: 2em;
+    background: transparent;
+}
+
+.account button {
+    position: absolute;
+    width: 200px;
+    background: var(--font);
+    color: #fff;
+    text-align: center;
+    font-size: 1.5em;
+    right: 0;
+    cursor: pointer;
+}
