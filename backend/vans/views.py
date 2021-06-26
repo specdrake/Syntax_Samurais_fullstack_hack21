@@ -4,6 +4,7 @@ from user.models import *
 from .models import *
 from rest_framework.response import Response
 import datetime
+from django.utils import timezone
 import pytz
 from .serializers import *
 from user.utils import Util
@@ -29,9 +30,7 @@ class Dashboard(generics.GenericAPIView):
         check = Vaccination_Schedule.objects.filter(user=user,type=here.received+1)
         if check.exists():
             check = Vaccination_Schedule.objects.get(user=user)
-            now = datetime.now()
-            intz = pytz.timezone("Asia/Kolkata")
-            intz.localize(now)
+            now = timezone.now()
             delta = check.date - now
             res["due_days"] = delta.days
             res["waypoint"]  = check.waypoint.name
