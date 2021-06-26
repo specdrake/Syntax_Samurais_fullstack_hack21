@@ -1,0 +1,1 @@
+web: gunicorn locowin.wsgi --log-file -
