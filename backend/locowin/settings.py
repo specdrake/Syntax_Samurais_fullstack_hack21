@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     #Installed
     'rest_framework',
     'drf_yasg',
-    #'corsheaders',
+    'corsheaders',
     'whitenoise.runserver_nostatic',
 ]
 SWAGGER_SETTINGS = {
@@ -87,10 +87,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 
-    #'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
-#CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'locowin.urls'
 
