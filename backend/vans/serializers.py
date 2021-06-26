@@ -12,6 +12,7 @@ class AllSlotsSerializer(serializers.ModelSerializer):
         queue = Waypoint_Queue.objects.get(waypoint=attrs)
         van_here = Van.objects.get(id=queue.van.id)
         res = {
+            "id"    : van_here.id,
             "dose1" : van_here.d1,
             "dose2" : van_here.d2,
             "brand" : van_here.brand,
