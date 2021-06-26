@@ -99,7 +99,7 @@ class BookSlot(generics.GenericAPIView):
         delta = waypoint.eta - timezone.now()
         if delta.seconds <= 0:
             return Response({"status" : "Failed","errors" : "Waypoint is fully booked"},status=status.HTTP_400_BAD_REQUEST)
-        if Vaccination_Schedule.objects.filter(waypoint=waypoint,user=curr_user).exists():
+        if Vaccination_Schedule.objects.filter(user=curr_user).exists():
             return Response({"status" : "Failed","errors" : "You already have one booked slot"},status=status.HTTP_400_BAD_REQUEST)
         queue = Waypoint_Queue.objects.get(waypoint=waypoint)
         van_here = Van.objects.get(id=queue.van.id)
