@@ -47,3 +47,9 @@ class LocationMark(serializers.Serializer):
     
     class Meta:
         field = ('waypoint_id')
+        
+class VanSerialzier(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Van,
+        fields = ('id','d1','d2','brand','latitude','longitude')

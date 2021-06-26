@@ -280,3 +280,16 @@ class LocationMark(generics.GenericAPIView):
             data = {'email_body' : email_body,'email_subject' : 'LoCoWin - Slot Cancellation','to_email' : ele.user.email}
             Util.send_confirmation(data)
         return Response({"status" : "OK","result" : "Van location updated and users in the next slot have been informed"},status=status.HTTP_200_OK)
+
+
+class VanALLView(generics.ListAPIView):
+    permission_classes =[AuthenticatedOfficer]
+    serializer_class = VanSerialzier
+    queryset = Van.objects.all()
+    
+class SpecificVan(generics.RetrieveAPIView):
+    permission_classes = [AuthenticatedOfficer]
+    serializer_class = VanSerialzier
+    queryset = Van.objects.all()
+    lookup_field = 'id'
+    
