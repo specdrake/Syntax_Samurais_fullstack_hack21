@@ -69,9 +69,10 @@ def makeWpQueue():
         van = i / 5 + offsetv;
         eta = init_time + datetime.timedelta(hours=(i % 5) * duration)
         print(i + 1,"--> ", eta)
-        Waypoint_Queue.objects.create(waypoint=Waypoint.objects.get(id=i+offsetw), van=Van.objects.get(id=van), eta=eta)
-
-
+        wpoint = Waypoint.objects.get(id=i+offsetw)
+        Waypoint_Queue.objects.create(waypoint=wpoint, van=Van.objects.get(id=van), eta=eta)
+        wpoint.eta = eta
+        wpoint.save()
 
 if __name__=='__main__':
     #compile()
