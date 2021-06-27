@@ -57,6 +57,8 @@ class BestSlots(generics.GenericAPIView):
             return Response({"status" : "Failed","errors" : "You have already taken both the doses"},status=status.HTTP_400_BAD_REQUEST)
         all = []
         for ele in Waypoint.objects.all():
+            if not Waypoint_Queue.objects.filter(waypoint=ele).exists():
+                continue
             queue = Waypoint_Queue.objects.get(waypoint=ele)
             van_here = Van.objects.get(id=queue.van.id)
             delta = ele.eta - timezone.now()
