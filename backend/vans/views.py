@@ -312,7 +312,7 @@ class CancelSlotView(generics.GenericAPIView):
         user_here = User.objects.get(id=user.id)
         if not Vaccination_Schedule.objects.filter(user=user_here).exists():
             return Response({"status" : "Failed","errors" : "No booked slot found for user"},status=status.HTTP_400_BAD_REQUEST)
-        schedule = Vaccination_Schedule.objects.filter(user=user_here)
+        schedule = Vaccination_Schedule.objects.filter(user=user_here)[0]
         waypoint = Waypoint.objects.get(id=schedule.waypoint.id)
         van = Van.objects.get(id=schedule.van.id)
         if schedule.type == 1:
