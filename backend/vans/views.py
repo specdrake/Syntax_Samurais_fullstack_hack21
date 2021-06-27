@@ -244,6 +244,14 @@ class Sendgrievancemail(generics.GenericAPIView):
                     'brand' : ele.van.brand,
                     'dose' : ele.type
                 }
+                van = Van.objects.get(id=ele.van.id)
+                if ele.type == 1:
+                    van.d1 += 1
+                else:
+                    van.d2 += 1
+                waypoint.capacity += 1
+                van.save()
+                waypoint.save()
                 ele.delete()
                 data = {'email_body' : email_body,'email_subject' : 'LoCoWin - Slot Cancellation','to_email' : ele.user.email}
                 Util.send_cancellation(data)
