@@ -13,5 +13,6 @@ urlpatterns = [
     path('cancel/',Sendgrievancemail.as_view(),name='cancel'),
     path('mark/',LocationMark.as_view(),name='mark'),
     path('vanall',VanALLView.as_view(),name='vanall'),
-    path('van/<int:id>',SpecificVan.as_view(),name='specific_van')
+    path('van/<int:id>',SpecificVan.as_view(),name='specific_van'),
+    path('cancelself/',CancelSlotView.as_view(),name='cancel_self'),
 ]

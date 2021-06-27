@@ -302,3 +302,25 @@ class SpecificVan(generics.RetrieveAPIView):
     queryset = Van.objects.all()
     lookup_field = 'id'
     
+class CancelSlotView(generics.GenericAPIView):
+    permission_classes =[Authenticated]
+    #serializer_class = LocationMark
+    
+    def post(self,request):
+        data = request.data
+        user = self.request.user
+        user_here = User.objects.get(id=user.id)
+        if not Vaccination_Schedule.objects.filter(user=user_here).exists():
+            return Response({"status" : "Failed","errors" : "No booked slot found for user"},status=status.HTTP_400_BAD_REQUEST)
+        schedule = Vaccination_Schedule.objects.filter(user=user_here)
+        waypoint = Waypoint.objects.get(id=schedule.waypoint.id)
+        van = Van.objects.get(id=schedule.van.id)
+        if schedule.type == 1:
+            van.d1 += 1
+        else:
+            van.d2 += 1
+        waypoint.capacity += 1
+        van.save()
+        waypoint.save()
+        schedule.delete() 
+        return Response({"status" : "OK","result" : "Your vaccination slot booking has been cancelled"},status=status.HTTP_200_OK)
