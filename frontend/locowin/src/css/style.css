@@ -156,7 +156,7 @@ body {
 
 .wp-buttons {
     display: flex;
-    margin-left: calc(30vw - 240px);
+    margin-left: calc(30vw - 120px);
 }
 
 .wp-buttons div {
@@ -207,10 +207,16 @@ body {
     font-style: italic;
 }
 
+.edit-link {
+    position: absolute;
+    top: 80vh;
+    right: calc(15vw + 350px);
+}
+
 .ret-link {
     position: absolute;
     top: 80vh;
-    left: 60vw;
+    right: 15vw;
 }
 
 .ret-button {
@@ -221,6 +227,13 @@ body {
     color: #fff;
     text-align: center;
     font-size: 1.5em;
+}
+
+.cancel-btn {
+    position: absolute;
+    right: 15vw;
+    top: calc(80vh - 70px);
+    cursor: pointer;
 }
 
 /* =========== LOGIN =========== */
@@ -278,7 +291,7 @@ body {
     background: transparent;
 }
 
-.login button {
+.login .log-btn {
     position: absolute;
     width: 200px;
     background: var(--font);
@@ -306,7 +319,7 @@ body {
 .acc-area {
     position: absolute;
     width: 60vw;
-    top: 30vh;
+    top: 25vh;
     left: 20vw;
 }
 
@@ -327,7 +340,7 @@ body {
     background: transparent;
 }
 
-.account button {
+.account .acc-btn {
     position: absolute;
     width: 200px;
     background: var(--font);
@@ -336,4 +349,67 @@ body {
     font-size: 1.5em;
     right: 0;
     cursor: pointer;
+}
+
+.account select {
+    width: 200px;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    border-bottom: 3px solid var(--font);
+    font-size: 2em;
+}
+
+.account #acc-com {
+    position: unset;
+    position: absolute;
+    right: 200px;
+    bottom: -8px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+}
+
+.account label {
+    position: absolute;
+    right: 0;
+    font-size: 1.2em;
+    width: 200px;
+    text-align: right;
+}
+
+/* ============= EMAIL =========== */
+
+.email {
+    position: absolute;
+    width: 80vw;
+    margin: 20vh 10vw;
+}
+
+.email .message {
+    color: var(--font);
+    font-size: 2.7em;
+}
+
+.email .mail, .email .tip {
+    color: var(--font);
+    margin: 40px 0;
+    font-size: 1.5em;
+}
+
+.email .return {
+    background: var(--font);
+    width: 200px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 1.5em;
+    color: #fff;
+    margin: 40px 0;
+}
+
+/* ============== POPUP ============= */
+
+.popup {
+    position: fixed;
 }

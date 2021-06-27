@@ -1,11 +1,10 @@
-import { useState } from 'react';
 import { Link } from 'react-router-dom'
 
 export default function NavBar() {
-    const [loggedIn, setLogin] = useState(false)
-
+    const user = JSON.parse(localStorage.getItem('logged-user'))
+    
     function getNavData() {
-        if (!loggedIn) {
+        if (!user) {
             return (
                 <div className="buttons">
                     <Link to="/login" className="link">
@@ -14,13 +13,18 @@ export default function NavBar() {
                     <Link to="/login" className="link">
                         <div className="nav-reg">Register</div>
                     </Link>
-                </div>    
+                </div>
             )
+        } else if (user.first_time_login) {
+            return
         } else {
             return (
                 <div className="buttons">
                     <Link to="/dashboard" className="link">
                         <div className="nav-dash">Dashboard</div>
+                    </Link>
+                    <Link to="/login" className="link" onClick={() => localStorage.clear()}>
+                        <div className="nav-dash">Log Out</div>
                     </Link>
                 </div>  
             ) 

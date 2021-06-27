@@ -1,59 +1,127 @@
-import { useState } from 'react'
+import { Link, Redirect } from 'react-router-dom'
+import PopupComp from '../helpers/Popup-comp'
+import { useState, useEffect } from 'react'
 import moment from 'moment'
-import { Link } from 'react-router-dom'
+
+const BASE = 'https://locowin.herokuapp.com'
 
 export default function Dashboard() {
+	const [prop, setProp] = useState({sev: "", msg: ""})
+	let user = JSON.parse(localStorage.getItem('logged-user'))
+	const [dash_data, setDash] = useState({
+		due_days: null,
+		doses: '-',
+		message: "You are yet to book a slot"
+	})
 
-	const [isLoggedIn, setLogin] = useState(true)
 
-	if (!isLoggedIn) {
-		// return <Redirect to="/login" />
+	function updateDash() {
+		fetch(`${BASE}/vaccine/dashboard`, {
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${user.tokens.access}`
+			},
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw "Something went wrong"
+			}
+			return response.json()
+		})
+		.then(data => {
+			setDash(data)
+		})
+		.catch(err => {
+			setProp({sev: 'error', msg: err})
+		})
 	}
 
-	const user = {
-		due: new Date('June 28, 2021'),
-		received: 1,
-		waypoint: {
-			address: "Bawana Industrial Area",
-			date: new Date('June 29, 2021 10:30:00')
-		}
-	}
+	useEffect(() => {
+		if (user)
+			updateDash()
+	}, [])
 
-	function getDays(next) {
-		let cur = new Date();
-		let td = next.getTime() - cur.getTime()
-		return Math.floor(td / (1000 * 60 * 60 * 24));
+
+	if (!user) {
+		return <Redirect to="/login" />
 	}
 
 	function parseStatus(received) {
-		if (received == 1) return 1 + " dose"
+		if (received === 1) return 1 + " dose"
 		return received + " doses"
 	}
 
 	function parseDate(date) {
-		return moment(date).format("Do MMMM YYYY, hh:mm a")
+		return moment(date).format("on Do MMMM YYYY, hh:mm a")
+	}
+
+	function cancel() {
+		fetch(`${BASE}/vaccine/cancelself/`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${user.tokens.access}`
+			},
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw "Something went wrong"
+			}
+			return response.json()
+		})
+		.then(data => {
+			setProp({sev: 'success', msg: "Your booking was cancelled successfully"})
+			updateDash()
+		})
+		.catch(err => {
+			setProp({sev: 'error', msg: err})
+		})
+	}
+
+	function parseWp() {
+		if (dash_data.message == null) {
+			return (
+				<div className="dash-tip">
+					Your booked waypoint is
+					<div className="dash-add">
+						<p>{dash_data.waypoint}</p>
+						<p>{parseDate(new Date(dash_data.datetime))}</p>
+					</div>
+				</div>
+			)
+		}
+		return (
+			<div className="dash-tip">
+				{dash_data.message}
+			</div>
+		)
+	}
+
+	function parseDue(x) {
+		if (x == null) return "-"
+		return x + 1
 	}
 
 	return (
 		<div className="dashboard">
 			<div className="dash-area">
 				<div className="dash-tip">
-					Your next vaccination is due in <span>{getDays(user.due)}</span> days
+					Your next vaccination is due in <span>{parseDue(dash_data.due_days)}</span> days
 				</div>
 				<div className="dash-tip">
-					You have received <span>{parseStatus(user.received)}</span> so far
+					You have received <span>{parseStatus(dash_data.doses)}</span> so far
 				</div>
-				<div className="dash-tip">
-					Your booked waypoint: 
-					<div className="dash-add">
-						<p>{user.waypoint.address}</p>
-						<p>{parseDate(user.waypoint.date)}</p>
-					</div>
-				</div>
+				{parseWp()}
+				<div className="ret-button cancel-btn" onClick={() => cancel()}>Cancel booking</div>
+				<Link to="/account" className="link edit-link">
+					<div className="ret-button">Edit account details</div>
+				</Link>
 				<Link to="/" className="link ret-link">
 					<div className="ret-button">Return to Home</div>
 				</Link>
 			</div>
+			<PopupComp data={prop} />
 		</div>
 	);
 }
